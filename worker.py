@@ -1,20 +1,21 @@
 from multiprocessing.managers import BaseManager
 from multiprocessing import Process
-from multiprocessing import Pool
 from multiprocessing import Queue
 import math, sys, time
+import queue
 
 
 class QueueManager(BaseManager):
     pass
 
 
-def worker_main(X,inqueue,outqueue):
+def worker_main(X, inqueue, outqueue):
     while True:
-        if inqueue.empty():
-            break;
-        else:
-            data = inqueue.get()
+        try:
+            data = inqueue.get(True, 0.05)
+        except queue.Empty:
+            print('spierdalaj')
+            break
         A = data[0]
         nr = data[1]
         print(nr)
@@ -27,7 +28,7 @@ def worker_main(X,inqueue,outqueue):
                 s += A[i][c] * X[c][0]
             # time.sleep(0.1)
             y.append(s)
-        outqueue.put([y,nr])
+        outqueue.put([y, nr])
 
 
 def main():
@@ -38,11 +39,19 @@ def main():
     m.connect()
     inqueue = m.in_queue()
     outqueue = m.out_queue()
-    X=inqueue.get()
-    for i in range(0,n-1):
-            Process(target=worker_main, args=(X,inqueue, outqueue)).start()
+    X = inqueue.get()
+    start = time.time()
+    jobs = []
+    for i in range(0, n):
+        jobs.append(Process(target=worker_main, args=(X, inqueue, outqueue)))
+        jobs[i].start()
+    for i in range(0, n):
+        jobs[i].join()
+    end = time.time()
+    print(end - start)
+    print('amdahl:')
 
-
+    print(1/((1-0.43)+0.43/n))
 
 if __name__ == '__main__':
     main()

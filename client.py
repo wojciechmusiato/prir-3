@@ -34,6 +34,9 @@ def read(fname):
 
 
 def main():
+    start = time.time()
+
+
     QueueManager.register('in_queue')
     QueueManager.register('out_queue')
     m = QueueManager(address=('127.0.0.1', 9001), authkey=bytes("bla bla", "utf-8"))
@@ -41,7 +44,7 @@ def main():
     inqueue = m.in_queue()
     outqueue = m.out_queue()
 
-    ncpus = int(sys.argv[1]) if len(sys.argv) > 1 else 4
+    ncpus = int(sys.argv[1]) if len(sys.argv) > 1 else 100
     fnameA = sys.argv[2] if len(sys.argv) > 2 else "A.dat"
     fnameX = sys.argv[3] if len(sys.argv) > 3 else "X.dat"
 
@@ -63,5 +66,8 @@ def main():
         R[zakresy[O[1]]:zakresy[O[1]+1]-1] = O[0]
         i += 1
     print(R)
+    end = time.time()
+    print(end - start)
+
 if __name__ == '__main__':
     main()
