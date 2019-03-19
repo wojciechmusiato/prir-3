@@ -14,7 +14,6 @@ def worker_main(X, inqueue, outqueue):
         try:
             data = inqueue.get(True, 0.05)
         except queue.Empty:
-            print('spierdalaj')
             break
         A = data[0]
         nr = data[1]
